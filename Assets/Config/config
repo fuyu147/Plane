@@ -1,0 +1,10 @@
+MoveUp=Space,E
+MoveDown=LeftShift,Q
+
+MoveForward=W,UpArrow
+MoveLeft=A,LeftArrow
+MoveBackward=S,BackArrow
+MoveRight=D,RightArrow
+
+-- MoveAccelerate=Space
+-- MoveBrake=Shift
