@@ -12,13 +12,15 @@ public class Movement : MonoBehaviour
     {
         var config = mManager.GetComponent<Config>().config;
 
-        mMovementKeys = new() { };
-        mMovementKeys.Add((config.mMovementUp.ToArray(), Vector3.up));
-        mMovementKeys.Add((config.mMovementDown.ToArray(), Vector3.down));
-        mMovementKeys.Add((config.mMovementForward.ToArray(), Vector3.forward));
-        mMovementKeys.Add((config.mMovementLeft.ToArray(), Vector3.left));
-        mMovementKeys.Add((config.mMovementBackward.ToArray(), Vector3.back));
-        mMovementKeys.Add((config.mMovementRight.ToArray(), Vector3.right));
+        mMovementKeys = new()
+        {
+            (config.movementConfig.Up.ToArray(), Vector3.up),
+            (config.movementConfig.Down.ToArray(), Vector3.down),
+            (config.movementConfig.Forward.ToArray(), Vector3.forward),
+            (config.movementConfig.Left.ToArray(), Vector3.left),
+            (config.movementConfig.Backward.ToArray(), Vector3.back),
+            (config.movementConfig.Right.ToArray(), Vector3.right)
+        };
     }
 
     public void Update()

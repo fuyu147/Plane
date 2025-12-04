@@ -323,8 +323,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mFollowedObject: {fileID: 1796048028}
   mOffset: {x: 0, y: 3, z: -10}
-  mCamSpeed: 10
-  mCamSensitivity: 50
+  mManager: {fileID: 1761259416}
 --- !u!1 &1460787858
 GameObject:
   m_ObjectHideFlags: 0

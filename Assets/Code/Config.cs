@@ -4,24 +4,49 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 
+public struct MovementConfig
+{
+    public List<KeyCode> Forward;
+    public List<KeyCode> Left;
+    public List<KeyCode> Backward;
+    public List<KeyCode> Right;
+
+    public List<KeyCode> Up;
+    public List<KeyCode> Down;
+
+    public List<KeyCode> Jump;
+    public List<KeyCode> Crawl;
+}
+
+public struct CameraConfig
+{
+    public float Speed;
+    public float Sensitivity;
+    public float FOV;
+}
+
 public struct Configuration
 {
-    public List<KeyCode> mMovementForward;
-    public List<KeyCode> mMovementLeft;
-    public List<KeyCode> mMovementBackward;
-    public List<KeyCode> mMovementRight;
-    public List<KeyCode> mMovementDown;
-    public List<KeyCode> mMovementUp;
+    public MovementConfig movementConfig;
+    public CameraConfig cameraConfig;
 
     public Configuration(string _filepath)
     {
-        mMovementForward = new() { KeyCode.None };
-        mMovementLeft = new() { KeyCode.None };
-        mMovementBackward = new() { KeyCode.None };
-        mMovementRight = new() { KeyCode.None };
-        mMovementDown = new() { KeyCode.None };
-        mMovementUp = new() { KeyCode.None };
+        // mMovementForward = new() { KeyCode.None };
+        // mMovementLeft = new() { KeyCode.None };
+        // mMovementBackward = new() { KeyCode.None };
+        // mMovementRight = new() { KeyCode.None };
+        // mMovementDown = new() { KeyCode.None };
+        // mMovementUp = new() { KeyCode.None };
+        //
+        movementConfig = new();
 
+        cameraConfig = new()
+        {
+            Speed = 0,
+            Sensitivity = 0,
+            FOV = 80
+        };
 
         if (!File.Exists(_filepath))
         {
@@ -29,44 +54,51 @@ public struct Configuration
             return;
         }
 
-        using (var sr = new StreamReader(_filepath))
+        using var sr = new StreamReader(_filepath);
+        while (!sr.EndOfStream)
         {
-            while (!sr.EndOfStream)
+            var _line = sr.ReadLine();
+            if (!_line.StartsWith("--")
+                && !String.IsNullOrWhiteSpace(_line)
+                )
             {
-                var _line = sr.ReadLine();
-                if (!_line.StartsWith("--")
-                    && !System.String.IsNullOrWhiteSpace(_line)
-                    )
-                {
-                    string[] _entry = _line.Split("=");
-                    if (_entry.Length != 2) continue;
-                    string _entryName = _entry[0];
-                    string _entryValue = _entry[1];
-                    Debug.Log($"<{_entryName}>, <{_entryValue}>");
+                string[] _entry = _line.Split("=");
+                if (_entry.Length != 2) continue;
+                string _entryName = _entry[0];
+                string _entryValue = _entry[1];
+                Debug.Log($"<{_entryName}>, <{_entryValue}>");
 
-                    switch (_entryName)
-                    {
-                        case "MoveUp":
-                            mMovementUp = parseStringToKeycodes(_entryValue);
-                            break;
-                        case "MoveDown":
-                            mMovementDown = parseStringToKeycodes(_entryValue);
-                            break;
-                        case "MoveForward":
-                            mMovementForward = parseStringToKeycodes(_entryValue);
-                            break;
-                        case "MoveLeft":
-                            mMovementLeft = parseStringToKeycodes(_entryValue);
-                            break;
-                        case "MoveBackward":
-                            mMovementBackward = parseStringToKeycodes(_entryValue);
-                            break;
-                        case "MoveRight":
-                            mMovementRight = parseStringToKeycodes(_entryValue);
-                            break;
-                        default:
-                            break;
-                    }
+                switch (_entryName)
+                {
+                    case "MoveUp":
+                        movementConfig.Up = parseStringToKeycodes(_entryValue);
+                        break;
+                    case "MoveDown":
+                        movementConfig.Down = parseStringToKeycodes(_entryValue);
+                        break;
+                    case "MoveForward":
+                        movementConfig.Forward = parseStringToKeycodes(_entryValue);
+                        break;
+                    case "MoveLeft":
+                        movementConfig.Left = parseStringToKeycodes(_entryValue);
+                        break;
+                    case "MoveBackward":
+                        movementConfig.Backward = parseStringToKeycodes(_entryValue);
+                        break;
+                    case "MoveRight":
+                        movementConfig.Right = parseStringToKeycodes(_entryValue);
+                        break;
+                    case "CameraSpeed":
+                        float.TryParse(_entryValue, out cameraConfig.Speed);
+                        break;
+                    case "CameraSensitivity":
+                        float.TryParse(_entryValue, out cameraConfig.Sensitivity);
+                        break;
+                    case "CameraFOV":
+                        float.TryParse(_entryValue, out cameraConfig.FOV);
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -94,8 +126,8 @@ public class Config : MonoBehaviour
     [SerializeField] string mConfigFile;
     public Configuration config;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    // Awake is called once before the first execution of Update after the MonoBehaviour is created
+    void Awake()
     {
         string _configFile = Path.Combine(Application.dataPath, mConfigFile);
         config = new Configuration(_configFile);

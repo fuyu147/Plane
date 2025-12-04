@@ -6,5 +6,11 @@ MoveLeft=A,LeftArrow
 MoveBackward=S,BackArrow
 MoveRight=D,RightArrow
 
+CameraSpeed=10
+CameraSensitivity=50.0
+CameraFOV=103
+
 -- MoveAccelerate=Space
 -- MoveBrake=Shift
+
+-- ajouter action: pencher à gauche/droite, ???
