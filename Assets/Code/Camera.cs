@@ -6,18 +6,25 @@ public class CCamera : MonoBehaviour
     [SerializeField] Vector3 mOffset;
     [SerializeField] GameObject mManager;
 
+    Config mConfig;
+
     CameraConfig mCameraConfig;
     float mPitch = 0.0f;
     float mYaw = 0.0f;
+
+    void UpdateKeys()
+    {
+        mCameraConfig = mConfig.cameraConfig;
+    }
 
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        var config = mManager.GetComponent<Config>().config;
+        mConfig = mManager.GetComponent<Config>();
 
-        mCameraConfig = config.cameraConfig;
+        UpdateKeys();
 
         mYaw = mFollowedObject.transform.eulerAngles.y;
         mPitch = mFollowedObject.transform.eulerAngles.x;
@@ -56,8 +63,9 @@ public class CCamera : MonoBehaviour
 
     void Update()
     {
+        UpdateKeys();
         Camera.main.fieldOfView = mCameraConfig.FOV;
-        print($"Cam fov : {mCameraConfig.FOV}");
+        // print($"Cam fov : {mCameraConfig.FOV}");
 
         if (!mFollowedObject) return;
 

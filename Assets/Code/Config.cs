@@ -14,6 +14,7 @@ public struct MovementConfig
     public List<KeyCode> Up;
     public List<KeyCode> Down;
 
+    public List<KeyCode> Run;
     public List<KeyCode> Jump;
     public List<KeyCode> Crawl;
 }
@@ -25,36 +26,70 @@ public struct CameraConfig
     public float FOV;
 }
 
-public struct Configuration
+public class Config : MonoBehaviour
 {
+    [SerializeField] string mConfigFile;
+
     public MovementConfig movementConfig;
     public CameraConfig cameraConfig;
 
-    public Configuration(string _filepath)
+    string mConfigPath;
+    DateTime mLastWrite;
+
+    // Awake is called once before the first execution of Update after the MonoBehaviour is created
+    void Awake()
     {
-        // mMovementForward = new() { KeyCode.None };
-        // mMovementLeft = new() { KeyCode.None };
-        // mMovementBackward = new() { KeyCode.None };
-        // mMovementRight = new() { KeyCode.None };
-        // mMovementDown = new() { KeyCode.None };
-        // mMovementUp = new() { KeyCode.None };
-        //
-        movementConfig = new();
-
-        cameraConfig = new()
+        mConfigPath = Path.Combine(Application.dataPath, mConfigFile);
+        if (!File.Exists(mConfigPath))
         {
-            Speed = 0,
-            Sensitivity = 0,
-            FOV = 80
-        };
-
-        if (!File.Exists(_filepath))
-        {
-            Debug.Log($"File not found : {_filepath}");
+            print("Config.cs :: File not found: {mConfigPath}, unable to load settings.");
             return;
         }
 
-        using var sr = new StreamReader(_filepath);
+        LoadConfiguration();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (!File.Exists(mConfigPath)) return;
+
+        // print($"Config.cs :: Camera speed: {cameraConfig.Speed}");
+
+        var writeTime = File.GetLastWriteTime(mConfigPath);
+
+        if (writeTime != mLastWrite)
+        {
+            mLastWrite = writeTime;
+            LoadConfiguration();
+        }
+    }
+
+    void LoadConfiguration()
+    {
+        movementConfig = new()
+        {
+            Forward = new() { KeyCode.W },
+            Left = new() { KeyCode.A },
+            Backward = new() { KeyCode.S },
+            Right = new() { KeyCode.D },
+
+            Up = new() { KeyCode.E },
+            Down = new() { KeyCode.Q },
+
+            Run = new() { KeyCode.LeftShift },
+            Jump = new() { KeyCode.Space },
+            Crawl = new() { KeyCode.LeftControl },
+        };
+
+        cameraConfig = new()
+        {
+            Speed = 10,
+            Sensitivity = 50,
+            FOV = 80
+        };
+
+        using var sr = new StreamReader(mConfigPath);
         while (!sr.EndOfStream)
         {
             var _line = sr.ReadLine();
@@ -63,39 +98,46 @@ public struct Configuration
                 )
             {
                 string[] _entry = _line.Split("=");
-                if (_entry.Length != 2) continue;
-                string _entryName = _entry[0];
-                string _entryValue = _entry[1];
-                Debug.Log($"<{_entryName}>, <{_entryValue}>");
 
-                switch (_entryName)
+                if (_entry.Length != 2)
+                    continue;
+
+                string _name = _entry[0];
+                string _value = _entry[1];
+
+                // print($"<{_name}>, <{_value}>");
+
+                switch (_name)
                 {
                     case "MoveUp":
-                        movementConfig.Up = parseStringToKeycodes(_entryValue);
+                        movementConfig.Up = parseStringToKeycodes(_value);
                         break;
                     case "MoveDown":
-                        movementConfig.Down = parseStringToKeycodes(_entryValue);
+                        movementConfig.Down = parseStringToKeycodes(_value);
                         break;
                     case "MoveForward":
-                        movementConfig.Forward = parseStringToKeycodes(_entryValue);
+                        movementConfig.Forward = parseStringToKeycodes(_value);
                         break;
                     case "MoveLeft":
-                        movementConfig.Left = parseStringToKeycodes(_entryValue);
+                        movementConfig.Left = parseStringToKeycodes(_value);
                         break;
                     case "MoveBackward":
-                        movementConfig.Backward = parseStringToKeycodes(_entryValue);
+                        movementConfig.Backward = parseStringToKeycodes(_value);
                         break;
                     case "MoveRight":
-                        movementConfig.Right = parseStringToKeycodes(_entryValue);
+                        movementConfig.Right = parseStringToKeycodes(_value);
+                        break;
+                    case "MoveRun":
+                        movementConfig.Run = parseStringToKeycodes(_value);
                         break;
                     case "CameraSpeed":
-                        float.TryParse(_entryValue, out cameraConfig.Speed);
+                        float.TryParse(_value, out cameraConfig.Speed);
                         break;
                     case "CameraSensitivity":
-                        float.TryParse(_entryValue, out cameraConfig.Sensitivity);
+                        float.TryParse(_value, out cameraConfig.Sensitivity);
                         break;
                     case "CameraFOV":
-                        float.TryParse(_entryValue, out cameraConfig.FOV);
+                        float.TryParse(_value, out cameraConfig.FOV);
                         break;
                     default:
                         break;
@@ -105,38 +147,18 @@ public struct Configuration
 
     }
 
-    List<KeyCode> parseStringToKeycodes(string keysString)
+    static List<KeyCode> parseStringToKeycodes(string stringKeys)
     {
         List<KeyCode> keycodes = new() { };
-        var _keysString = keysString.Split(",");
+        var _keysString = stringKeys.Split(",");
         foreach (var _keyString in _keysString)
         {
-            if (Enum.TryParse(_keyString, out KeyCode key))
+            if (Enum.TryParse(_keyString.Trim(), out KeyCode key))
             {
                 keycodes.Add(key);
             }
         }
 
         return keycodes;
-    }
-}
-
-public class Config : MonoBehaviour
-{
-    [SerializeField] string mConfigFile;
-    public Configuration config;
-
-    // Awake is called once before the first execution of Update after the MonoBehaviour is created
-    void Awake()
-    {
-        string _configFile = Path.Combine(Application.dataPath, mConfigFile);
-        config = new Configuration(_configFile);
-        // print($"file : {filePath}");
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
     }
 }
