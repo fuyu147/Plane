@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class CCamera : MonoBehaviour
+public class CameraScript : MonoBehaviour
 {
     [SerializeField] GameObject mFollowedObject;
     [SerializeField] Vector3 mOffset;
@@ -11,11 +11,6 @@ public class CCamera : MonoBehaviour
     CameraConfig mCameraConfig;
     float mPitch = 0.0f;
     float mYaw = 0.0f;
-
-    void UpdateKeys()
-    {
-        mCameraConfig = mConfig.cameraConfig;
-    }
 
     void Start()
     {
@@ -28,6 +23,28 @@ public class CCamera : MonoBehaviour
 
         mYaw = mFollowedObject.transform.eulerAngles.y;
         mPitch = mFollowedObject.transform.eulerAngles.x;
+    }
+
+    void Update()
+    {
+        UpdateKeys();
+        Camera.main.fieldOfView = mCameraConfig.FOV;
+        if (Manager.DEBUG) print($"Cam fov : {mCameraConfig.FOV}");
+
+        if (!mFollowedObject)
+        {
+            print("Camera.cs :: No object to follow");
+            return;
+        }
+
+        HandlePosition();
+        HandlePlayerRotation();
+        HandleCameraRotation();
+    }
+
+    void UpdateKeys()
+    {
+        mCameraConfig = mConfig.cameraConfig;
     }
 
     void HandlePosition()
@@ -59,18 +76,5 @@ public class CCamera : MonoBehaviour
         mPitch = Mathf.Clamp(mPitch, -80f, 80f);
 
         mFollowedObject.transform.rotation = Quaternion.Euler(0, mYaw, 0);
-    }
-
-    void Update()
-    {
-        UpdateKeys();
-        Camera.main.fieldOfView = mCameraConfig.FOV;
-        // print($"Cam fov : {mCameraConfig.FOV}");
-
-        if (!mFollowedObject) return;
-
-        HandlePosition();
-        HandlePlayerRotation();
-        HandleCameraRotation();
     }
 }

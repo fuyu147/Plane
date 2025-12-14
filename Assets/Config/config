@@ -7,13 +7,8 @@ MoveUp=E
 MoveDown=Q
 
 MoveRun=LeftShift
--- MoveJump=Space
+MoveJump=Space
 
 CameraSpeed=10
 CameraSensitivity=30.0
 CameraFOV=103
-
--- MoveAccelerate=Space
--- MoveBrake=Shift
-
--- :::: ajouter action: pencher à gauche/droite, ???

@@ -11,12 +11,12 @@ public struct MovementConfig
     public List<KeyCode> Backward;
     public List<KeyCode> Right;
 
-    public List<KeyCode> Up;
-    public List<KeyCode> Down;
+    // public List<KeyCode> Up;
+    // public List<KeyCode> Down;
 
     public List<KeyCode> Run;
     public List<KeyCode> Jump;
-    public List<KeyCode> Crawl;
+    // public List<KeyCode> Crawl;
 }
 
 public struct CameraConfig
@@ -29,6 +29,10 @@ public struct CameraConfig
 public class Config : MonoBehaviour
 {
     [SerializeField] string mConfigFile;
+
+    const float CAMERA_DEFAULT_SPEED = 10;
+    const float CAMERA_DEFAULT_SENSITIVITY = 50;
+    const float CAMERA_DEFAULT_FOV = 80;
 
     public MovementConfig movementConfig;
     public CameraConfig cameraConfig;
@@ -54,7 +58,7 @@ public class Config : MonoBehaviour
     {
         if (!File.Exists(mConfigPath)) return;
 
-        // print($"Config.cs :: Camera speed: {cameraConfig.Speed}");
+        if (Manager.DEBUG) print($"Config.cs :: Camera speed: {cameraConfig.Speed}");
 
         var writeTime = File.GetLastWriteTime(mConfigPath);
 
@@ -74,19 +78,15 @@ public class Config : MonoBehaviour
             Backward = new() { KeyCode.S },
             Right = new() { KeyCode.D },
 
-            Up = new() { KeyCode.E },
-            Down = new() { KeyCode.Q },
-
             Run = new() { KeyCode.LeftShift },
             Jump = new() { KeyCode.Space },
-            Crawl = new() { KeyCode.LeftControl },
         };
 
         cameraConfig = new()
         {
-            Speed = 10,
-            Sensitivity = 50,
-            FOV = 80
+            Speed = CAMERA_DEFAULT_SPEED,
+            Sensitivity = CAMERA_DEFAULT_SENSITIVITY,
+            FOV = CAMERA_DEFAULT_FOV
         };
 
         using var sr = new StreamReader(mConfigPath);
@@ -105,39 +105,51 @@ public class Config : MonoBehaviour
                 string _name = _entry[0];
                 string _value = _entry[1];
 
-                // print($"<{_name}>, <{_value}>");
+                if (Manager.DEBUG) print($"<{_name}>, <{_value}>");
 
                 switch (_name)
                 {
-                    case "MoveUp":
-                        movementConfig.Up = parseStringToKeycodes(_value);
-                        break;
-                    case "MoveDown":
-                        movementConfig.Down = parseStringToKeycodes(_value);
-                        break;
                     case "MoveForward":
-                        movementConfig.Forward = parseStringToKeycodes(_value);
+                        movementConfig.Forward = ParseStringToKeycodes(_value);
                         break;
                     case "MoveLeft":
-                        movementConfig.Left = parseStringToKeycodes(_value);
+                        movementConfig.Left = ParseStringToKeycodes(_value);
                         break;
                     case "MoveBackward":
-                        movementConfig.Backward = parseStringToKeycodes(_value);
+                        movementConfig.Backward = ParseStringToKeycodes(_value);
                         break;
                     case "MoveRight":
-                        movementConfig.Right = parseStringToKeycodes(_value);
+                        movementConfig.Right = ParseStringToKeycodes(_value);
                         break;
                     case "MoveRun":
-                        movementConfig.Run = parseStringToKeycodes(_value);
+                        movementConfig.Run = ParseStringToKeycodes(_value);
+                        break;
+                    case "MoveJump":
+                        movementConfig.Jump = ParseStringToKeycodes(_value);
                         break;
                     case "CameraSpeed":
-                        float.TryParse(_value, out cameraConfig.Speed);
+                        if (!float.TryParse(_value, out cameraConfig.Speed))
+                        {
+                            print(
+$"Config.cs :: Failed to load camera speed, wrong value: {_value}. Using default value {CAMERA_DEFAULT_SPEED}"
+                            );
+                        }
                         break;
                     case "CameraSensitivity":
-                        float.TryParse(_value, out cameraConfig.Sensitivity);
+                        if (!float.TryParse(_value, out cameraConfig.Sensitivity))
+                        {
+                            print(
+$"Config.cs :: Failed to load camera sensitivity, wrong value: {_value}. Using default value {CAMERA_DEFAULT_SENSITIVITY}"
+                            );
+                        }
                         break;
                     case "CameraFOV":
-                        float.TryParse(_value, out cameraConfig.FOV);
+                        if (!float.TryParse(_value, out cameraConfig.FOV))
+                        {
+                            print(
+$"Config.cs :: Failed to load camera speed, wrong value: {_value}. Using default value {CAMERA_DEFAULT_FOV}"
+                            );
+                        }
                         break;
                     default:
                         break;
@@ -147,7 +159,7 @@ public class Config : MonoBehaviour
 
     }
 
-    static List<KeyCode> parseStringToKeycodes(string stringKeys)
+    static List<KeyCode> ParseStringToKeycodes(string stringKeys)
     {
         List<KeyCode> keycodes = new() { };
         var _keysString = stringKeys.Split(",");
