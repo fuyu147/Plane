@@ -29,7 +29,7 @@ public class CameraScript : MonoBehaviour
     {
         UpdateKeys();
         Camera.main.fieldOfView = mCameraConfig.FOV;
-        if (Manager.DEBUG) print($"Cam fov : {mCameraConfig.FOV}");
+        if (Manager.DEBUG && false) print($"Cam fov : {mCameraConfig.FOV}");
 
         if (!mFollowedObject)
         {

@@ -11,12 +11,12 @@ public struct MovementConfig
     public List<KeyCode> Backward;
     public List<KeyCode> Right;
 
-    // public List<KeyCode> Up;
-    // public List<KeyCode> Down;
-
     public List<KeyCode> Run;
     public List<KeyCode> Jump;
-    // public List<KeyCode> Crawl;
+
+    public float Speed;
+    public float SpeedRunModifier;
+    public float JumpImpulse;
 }
 
 public struct CameraConfig
@@ -58,7 +58,7 @@ public class Config : MonoBehaviour
     {
         if (!File.Exists(mConfigPath)) return;
 
-        if (Manager.DEBUG) print($"Config.cs :: Camera speed: {cameraConfig.Speed}");
+        if (Manager.DEBUG && false) print($"Config.cs :: Camera speed: {cameraConfig.Speed}");
 
         var writeTime = File.GetLastWriteTime(mConfigPath);
 
@@ -105,7 +105,7 @@ public class Config : MonoBehaviour
                 string _name = _entry[0];
                 string _value = _entry[1];
 
-                if (Manager.DEBUG) print($"<{_name}>, <{_value}>");
+                if (Manager.DEBUG && false) print($"<{_name}>, <{_value}>");
 
                 switch (_name)
                 {
@@ -130,25 +130,19 @@ public class Config : MonoBehaviour
                     case "CameraSpeed":
                         if (!float.TryParse(_value, out cameraConfig.Speed))
                         {
-                            print(
-$"Config.cs :: Failed to load camera speed, wrong value: {_value}. Using default value {CAMERA_DEFAULT_SPEED}"
-                            );
+                            print($"Config.cs :: Failed to load camera speed, wrong value: {_value}. Using default value {CAMERA_DEFAULT_SPEED}");
                         }
                         break;
                     case "CameraSensitivity":
                         if (!float.TryParse(_value, out cameraConfig.Sensitivity))
                         {
-                            print(
-$"Config.cs :: Failed to load camera sensitivity, wrong value: {_value}. Using default value {CAMERA_DEFAULT_SENSITIVITY}"
-                            );
+                            print($"Config.cs :: Failed to load camera sensitivity, wrong value: {_value}. Using default value {CAMERA_DEFAULT_SENSITIVITY}");
                         }
                         break;
                     case "CameraFOV":
                         if (!float.TryParse(_value, out cameraConfig.FOV))
                         {
-                            print(
-$"Config.cs :: Failed to load camera speed, wrong value: {_value}. Using default value {CAMERA_DEFAULT_FOV}"
-                            );
+                            print($"Config.cs :: Failed to load camera speed, wrong value: {_value}. Using default value {CAMERA_DEFAULT_FOV}");
                         }
                         break;
                     default:

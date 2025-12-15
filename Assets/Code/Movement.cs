@@ -13,14 +13,14 @@ public class Movement : MonoBehaviour
 
     [SerializeField] float mSpeed = 10;
     [SerializeField] float mSpeedRunModifier = 1.7f;
-    [SerializeField] float mJumpForce = 2000f; // assuming 50 kg mass
+    [SerializeField] float mJumpImpulse = 120f; // jumps about 1 meter assuming 50 kg mass
 
 
     List<(KeyCode[], Vector3)> mMovementKeys;
     KeyCode[] mRunKeys;
     KeyCode[] mJumpKeys;
 
-    void UpdateKeys()
+    void UpdateConfig()
     {
         mMovementKeys = new()
         {
@@ -39,41 +39,58 @@ public class Movement : MonoBehaviour
         mConfig = mManager.GetComponent<Config>();
         mRigidbody = GetComponent<Rigidbody>();
         mCollider = GetComponent<Collider>();
-        UpdateKeys();
+        UpdateConfig();
     }
 
     public void FixedUpdate()
     {
-        UpdateKeys();
-        var speed = mSpeed;
+        var _speed = mSpeed;
 
         foreach (var key in mRunKeys)
         {
             if (Input.GetKey(key))
             {
-                speed = mSpeed * mSpeedRunModifier;
+                _speed = mSpeed * mSpeedRunModifier;
                 break;
             }
         }
 
-        Vector3 movement = Vector3.zero;
+        Vector3 _movement = Vector3.zero;
         foreach (var (keys, direction) in mMovementKeys)
             foreach (var key in keys)
-                if (Input.GetKey(key)) movement += direction;
+                if (Input.GetKey(key)) _movement += direction;
 
-        movement.Normalize();
+        _movement.Normalize();
+
+        var _velocity = _speed
+                        * Time.fixedDeltaTime
+                        * transform.TransformDirection(_movement);
 
         mRigidbody.MovePosition(
                 mRigidbody.position +
-                speed *
-                Time.fixedDeltaTime *
-                transform.TransformDirection(movement));
+                _velocity);
 
-        bool jumped = false;
-        foreach (var key in mJumpKeys) if (Input.GetKey(key)) jumped = true;
-        var isGrounded = IsGrounded();
-        if (Manager.DEBUG) print($"Movement.cs :: {jumped} {isGrounded}");
-        if (jumped && isGrounded) mRigidbody.AddForce(new(0, mJumpForce, 0));
+        if (Manager.DEBUG && false) print($"Movement.cs :: velocity: {_velocity}");
+
+        bool _jumped = false;
+        foreach (var key in mJumpKeys) if (Input.GetKey(key)) _jumped = true;
+
+        var _isGrounded = IsGrounded();
+
+        if (Manager.DEBUG && true)
+            print($"Movement.cs :: {_jumped} {_isGrounded}");
+
+        var _jumpVelocity = Vector3.up * mJumpImpulse;
+        if (Manager.DEBUG && true)
+            print($"Movement.cs :: jump velocity {_jumpVelocity}");
+
+        if (_jumped && _isGrounded)
+            mRigidbody.AddForce(_jumpVelocity, ForceMode.Impulse);
+    }
+
+    void Update()
+    {
+        UpdateConfig();
     }
 
     bool IsGrounded()

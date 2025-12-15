@@ -11,4 +11,4 @@ MoveJump=Space
 
 CameraSpeed=10
 CameraSensitivity=30.0
-CameraFOV=103
+CameraFOV=50
